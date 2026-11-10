@@ -1,0 +1,25 @@
+# AGENTS.md
+
+## Unslop Before Committing
+
+Before committing, check the diff and refactor any AI-generated slop in the changes.
+
+This includes:
+
+- Extra comments that a human wouldn't add, or that clash with the file.
+- Extra try/catch or guard checks that look odd for that part of the code, above all when trusted callers already run them.
+- Casts to `any` that work around type issues.
+- Any other style that clashes with the file.
+- File or variable names that clash with the rest of the code.
+- New code that sits at a different level of abstraction than the code around it.
+- Comments that explain "what" code does -> pull into a well-named function or variable.
+- Code that forces a reader to open other functions to follow the logic.
+
+Tips:
+
+- After a refactor, recheck that the file name still fits.
+
+This project prefers:
+
+- Self-documenting code.
+- Read the source code and similar files to get the right context.
