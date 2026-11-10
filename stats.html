@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Stat Compare · Vindictus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="stats">
+  <header class="topbar">
+    <div class="wrap">
+      <div class="brand">
+        <h1><a href="index.html">Vindictus Profit Calculator</a></h1>
+        <p>Compare armor &amp; accessory stats by grade</p>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" title="Toggle light / dark" aria-label="Toggle light or dark theme">◐</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <div class="wrap">
+      <a class="tab" href="index.html" data-page="buy">Buy Calculator</a>
+      <a class="tab" href="stats.html" data-page="stats">Stat Compare</a>
+      <a class="tab" href="gacha.html" data-page="gacha">Gacha</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <section class="panel">
+      <div class="card">
+        <header>
+          <h2>Grade &amp; stat compare <span class="chip example">starting point</span></h2>
+          <p class="hint">Define the stats you care about, add each item at its grade, and the best value per stat column is highlighted. Awaiting your real grade/stat model.</p>
+        </header>
+        <div class="table-wrap">
+          <table id="stat-table">
+            <thead id="stat-head"></thead>
+            <tbody id="stat-body"></tbody>
+          </table>
+        </div>
+        <div class="controls">
+          <button class="btn btn-ghost" id="add-stat-row">+ Add item</button>
+          <label style="font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:8px">+ Stat column
+            <input id="new-stat" placeholder="e.g. ATT, Crit, Balance" autocomplete="off">
+          </label>
+          <button class="btn" id="add-stat-col">Add</button>
+        </div>
+      </div>
+      <p class="note">
+        <strong>Next for this tab:</strong> tell me the grades (names/order) and which stats each grade affects,
+        plus the two reference sites you use — I'll match their stat model so this slots in beside them.
+      </p>
+    </section>
+  </main>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/common.js"></script>
+  <script src="assets/stats.js"></script>
+</body>
+</html>

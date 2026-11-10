@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Gacha · Vindictus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="gacha">
+  <header class="topbar">
+    <div class="wrap">
+      <div class="brand">
+        <h1><a href="index.html">Vindictus Profit Calculator</a></h1>
+        <p>Box odds, roller &amp; coupon guarantees</p>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" title="Toggle light / dark" aria-label="Toggle light or dark theme">◐</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <div class="wrap">
+      <a class="tab" href="index.html" data-page="buy">Buy Calculator</a>
+      <a class="tab" href="stats.html" data-page="stats">Stat Compare</a>
+      <a class="tab" href="gacha.html" data-page="gacha">Gacha</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <div class="subtabs">
+      <button class="subtab" id="subtab-roller" aria-selected="true">Roller</button>
+      <button class="subtab" id="subtab-contents" aria-selected="false">Contents &amp; list</button>
+    </div>
+
+    <div class="panel" id="gview-roller">
+      <div class="card">
+        <header>
+          <h2>Open a box <span class="chip silver" id="box-name-roller"></span></h2>
+          <p class="hint">Weighted by the live drop rates. ×1 spins the reel; the bundles open in one batch.</p>
+        </header>
+        <div class="reel-viewport">
+          <div class="reel-marker"></div>
+          <div class="reel-strip" id="reel"></div>
+        </div>
+        <div class="roller-controls">
+          <button class="btn btn-primary open-btn" data-n="1" id="open-1">Open ×1</button>
+          <span class="bundle-group" id="bundle-group"></span>
+          <span class="custom-roll">
+            <input id="custom-n" class="num-in" inputmode="numeric" placeholder="#" aria-label="Custom number of boxes">
+            <button class="btn open-btn" id="open-custom">Open</button>
+          </span>
+          <button class="btn btn-ghost spacer" id="reset-session">Reset session</button>
+        </div>
+        <div class="roll-result" id="roll-result"></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <header><h2>Odds per box, by rarity</h2></header>
+          <div class="rarity-odds" id="rarity-odds"></div>
+        </div>
+        <div class="card">
+          <header>
+            <h2>Chasing a specific item</h2>
+            <p class="hint">Usually a Rare or Legendary.</p>
+          </header>
+          <div class="controls">
+            <label style="font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:8px;flex:1;min-width:0">Target
+              <select id="target-select" style="flex:1;min-width:0"></select>
+            </label>
+          </div>
+          <div id="target-odds"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <header><h2>This session</h2></header>
+        <div class="session-stats" id="session-stats"></div>
+      </div>
+
+      <p class="note" id="gacha-assumption"></p>
+    </div>
+
+    <div class="panel" id="gview-contents" hidden>
+      <div class="card">
+        <header>
+          <h2>Box contents <span class="chip silver" id="box-name-contents"></span></h2>
+          <p class="hint">Loaded from the official probability page. Rarity sets the convert value — coupons you get if you turn that item into coupons (white 1 · green 2 · blue 4 · orange 40 · pink 50). Spending coupons is the Exchange Shop below. When a new gacha goes live, update the list or hit Reset.</p>
+        </header>
+        <div class="table-wrap">
+          <table id="gacha-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Rarity</th>
+                <th class="num">Convert value</th>
+                <th class="num">Probability %</th>
+                <th style="width:34px"></th>
+              </tr>
+            </thead>
+            <tbody id="gacha-body"></tbody>
+          </table>
+        </div>
+        <div class="controls">
+          <button class="btn btn-ghost" id="add-gacha">+ Add item</button>
+          <button class="btn btn-ghost" id="reset-gacha">Reset to current box</button>
+          <span id="prob-total" class="usd-sub"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <header>
+          <h2>Exchange Shop</h2>
+          <p class="hint">Spend accumulated coupons to buy a guaranteed item. These costs drive the "Exchange Shop" line under each target.</p>
+        </header>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Item</th><th class="num">Qty</th><th class="num">Required coupons</th></tr>
+            </thead>
+            <tbody id="exchange-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/common.js"></script>
+  <script src="assets/gacha.js"></script>
+</body>
+</html>

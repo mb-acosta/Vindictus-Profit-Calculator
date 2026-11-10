@@ -3,473 +3,84 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <style>
-    :root { color-scheme: light; }
-    html, body { margin: 0; }
-    body { font-family: "Hanken Grotesk", system-ui, sans-serif; }
-    img { max-width: 100%; }
-    [hidden] { display: none !important; }
-  </style>
-<title>Vindictus Profit Calculator</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<style>
-  /* Layout: sticky bar over a two-tab tool. Everything resolves to million-gold per USD (M/$); gold marks gold, steel-blue marks airgead. */
-  :root {
-    --bg: #eceff3;
-    --surface: #ffffff;
-    --surface-2: #f5f7f9;
-    --border: #d7dce3;
-    --fg: #1a2130;
-    --muted: #5c6678;
-    --gold: #8f6413;
-    --gold-soft: #f3e6c6;
-    --silver: #35657f;
-    --silver-soft: #dbe8f0;
-    --good: #2d7a4c;
-    --bad: #b1473a;
-
-    --font-display: "Cinzel", Georgia, serif;
-    --font-body: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
-    --font-num: "IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
-
-    --radius: 10px;
-    --shadow: 0 1px 2px rgba(20, 28, 44, .06), 0 6px 20px rgba(20, 28, 44, .05);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #11141a; --surface: #191e27; --surface-2: #20262f; --border: #2b323d;
-      --fg: #e6eaf1; --muted: #97a2b2;
-      --gold: #d7a747; --gold-soft: #2d2614; --silver: #7cb0d0; --silver-soft: #14212b;
-      --good: #58bb80; --bad: #e0745d; color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #11141a; --surface: #191e27; --surface-2: #20262f; --border: #2b323d;
-    --fg: #e6eaf1; --muted: #97a2b2;
-    --gold: #d7a747; --gold-soft: #2d2614; --silver: #7cb0d0; --silver-soft: #14212b;
-    --good: #58bb80; --bad: #e0745d; color-scheme: dark;
-  }
-
-  * { box-sizing: border-box; }
-  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); line-height: 1.5; }
-  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); }
-
-  .wrap {
-    width: 100%; max-width: 1060px; margin: 0 auto;
-    padding-left: max(16px, env(safe-area-inset-left, 0px));
-    padding-right: max(16px, env(safe-area-inset-right, 0px));
-  }
-
-  .topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 15; background: var(--surface); border-bottom: 1px solid var(--border); }
-  .topbar .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding-block: 14px; }
-  .brand { display: flex; flex-direction: column; gap: 2px; margin-right: auto; }
-  .brand h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.15rem, 1rem + 1.1vw, 1.5rem); letter-spacing: .02em; margin: 0; }
-  .brand p { margin: 0; font-size: .8rem; color: var(--muted); }
-
-  .theme-toggle { border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); border-radius: 999px; width: 34px; height: 34px; cursor: pointer; font-size: 1rem; }
-  .theme-toggle:hover { color: var(--fg); }
-
-  .tabs { border-bottom: 1px solid var(--border); }
-  .tabs .wrap { display: flex; gap: 4px; }
-  .tab { appearance: none; border: none; background: none; font: inherit; font-weight: 600; color: var(--muted); padding: 12px 4px; margin-right: 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
-  .tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--gold); }
-
-  main { padding-block: 24px 64px; }
-  .panel { display: grid; gap: 24px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
-  .card > header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
-  .card > header h2 { margin: 0; font-size: 1rem; }
-  .card > header .hint { font-size: .8rem; color: var(--muted); max-width: 52ch; }
-
-  .field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; padding: 18px; }
-  .field { display: grid; gap: 5px; }
-  .field label { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
-  .field .sub { font-size: .72rem; color: var(--muted); }
-
-  .benchmark { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 0 18px 18px; }
-  .benchmark .big { font-family: var(--font-num); font-weight: 600; font-size: 1.9rem; color: var(--silver); font-variant-numeric: tabular-nums; }
-  .benchmark .unit { color: var(--muted); font-size: .85rem; }
-  .benchmark .break { font-size: .82rem; color: var(--muted); }
-
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; min-width: 680px; }
-  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: top; }
-  thead th { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--surface); }
-  tbody tr:last-child td { border-bottom: none; }
-  th.num, td.num { text-align: right; }
-  .num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
-  .item-name { font-weight: 600; }
-  .item-cat { font-size: .74rem; color: var(--muted); }
-  .usd-sub { font-size: .72rem; color: var(--muted); font-family: var(--font-body); }
-
-  input, select { font: inherit; color: var(--fg); background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 9px; }
-  input:focus-visible, select:focus-visible, button:focus-visible, .tab:focus-visible { outline: 2px solid var(--silver); outline-offset: 1px; }
-  input.num-in { width: 12ch; text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
-
-  .mpd { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 600; }
-  .delta { display: inline-flex; align-items: center; font-size: .75rem; font-weight: 600; padding: 3px 8px; border-radius: 999px; font-family: var(--font-num); }
-  .delta.up { background: color-mix(in srgb, var(--good) 15%, transparent); color: var(--good); }
-  .delta.down { background: color-mix(in srgb, var(--bad) 15%, transparent); color: var(--bad); }
-  .delta.flat { background: var(--surface-2); color: var(--muted); }
-
-  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 600; letter-spacing: .04em; padding: 3px 8px; border-radius: 999px; background: var(--gold-soft); color: var(--gold); }
-  .chip.example { background: var(--surface-2); color: var(--muted); border: 1px dashed var(--border); }
-  .chip.silver { background: var(--silver-soft); color: var(--silver); }
-
-  .btn { appearance: none; font: inherit; font-weight: 600; border: 1px solid var(--border); background: var(--surface-2); color: var(--fg); border-radius: 8px; padding: 7px 13px; cursor: pointer; }
-  .btn:hover { border-color: var(--silver); }
-  .btn-ghost { border-style: dashed; color: var(--muted); }
-  .btn-icon { border: none; background: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 4px; }
-  .btn-icon:hover { color: var(--bad); }
-  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 18px; }
-
-  .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; padding: 18px; }
-  .compare:empty::after { content: "Tick one or more items above to weigh them against airgead."; color: var(--muted); font-size: .85rem; }
-  .cc { border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: grid; gap: 8px; align-content: start; background: var(--surface-2); }
-  .cc.best { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); background: var(--surface); }
-  .cc.airgead { border-style: dashed; }
-  .cc h3 { margin: 0; font-size: .95rem; }
-  .cc .lead { font-family: var(--font-num); font-weight: 600; font-size: 1.4rem; }
-  .cc dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-size: .82rem; }
-  .cc dt { color: var(--muted); }
-  .cc dd { margin: 0; font-family: var(--font-num); font-variant-numeric: tabular-nums; text-align: right; }
-
-  .note { font-size: .82rem; color: var(--muted); background: var(--silver-soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
-  .note strong { color: var(--fg); }
-  .stat-best { background: var(--gold-soft); color: var(--gold); font-weight: 600; border-radius: 6px; }
-</style>
+  <title>Vindictus Profit Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="assets/styles.css">
 </head>
-<body>
-<header class="topbar">
-  <div class="wrap">
-    <div class="brand">
-      <h1>Vindictus Profit Calculator</h1>
-      <p>Million-gold per USD across cash-shop items &amp; airgead</p>
+<body data-page="buy">
+  <header class="topbar">
+    <div class="wrap">
+      <div class="brand">
+        <h1><a href="index.html">Vindictus Profit Calculator</a></h1>
+        <p>Million-gold per USD across cash-shop items &amp; airgead</p>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" title="Toggle light / dark" aria-label="Toggle light or dark theme">◐</button>
     </div>
-    <button class="theme-toggle" id="theme-toggle" title="Toggle light / dark" aria-label="Toggle light or dark theme">◐</button>
-  </div>
-</header>
+  </header>
 
-<nav class="tabs">
-  <div class="wrap">
-    <button class="tab" id="tabbtn-buy" role="tab" aria-selected="true" aria-controls="tab-buy">Buy Calculator</button>
-    <button class="tab" id="tabbtn-stat" role="tab" aria-selected="false" aria-controls="tab-stat">Stat Compare</button>
-  </div>
-</nav>
+  <nav class="tabs">
+    <div class="wrap">
+      <a class="tab" href="index.html" data-page="buy">Buy Calculator</a>
+      <a class="tab" href="stats.html" data-page="stats">Stat Compare</a>
+      <a class="tab" href="gacha.html" data-page="gacha">Gacha</a>
+    </div>
+  </nav>
 
-<main class="wrap">
-  <section class="panel" id="tab-buy" role="tabpanel" aria-labelledby="tabbtn-buy">
-    <div class="card">
-      <header>
-        <h2>Airgead benchmark <span class="chip silver">baseline</span></h2>
-        <p class="hint">What your USD buys as gold through airgead. Every item below is measured against this. Prices fluctuate — enter the current ones.</p>
-      </header>
-      <div class="field-grid">
-        <div class="field">
-          <label for="ag-market">Airgead per 1M gold</label>
-          <input id="ag-market" class="num-in" inputmode="decimal" autocomplete="off">
-          <span class="sub">market rate (e.g. 300–400) · 1 airgead = 1 NX</span>
+  <main class="wrap">
+    <section class="panel">
+      <div class="card">
+        <header>
+          <h2>Airgead benchmark <span class="chip silver">baseline</span></h2>
+          <p class="hint">What your USD buys as gold through airgead. Every item below is measured against this. Prices fluctuate — enter the current ones.</p>
+        </header>
+        <div class="field-grid">
+          <div class="field">
+            <label for="ag-market">Airgead per 1M gold</label>
+            <input id="ag-market" class="num-in" inputmode="decimal" autocomplete="off">
+            <span class="sub">market rate (e.g. 300–400) · 1 airgead = 1 NX</span>
+          </div>
         </div>
+        <div class="benchmark" id="benchmark"></div>
       </div>
-      <div class="benchmark" id="benchmark"></div>
-    </div>
 
-    <div class="card">
-      <header>
-        <h2>Cash-shop items</h2>
-        <p class="hint">Enter what each item currently sells for in gold (accepts <code>60m</code>, <code>900k</code>). NX prices are fixed from the catalog. "vs airgead" shows how much better or worse its M/$ is than the benchmark.</p>
-      </header>
-      <div class="table-wrap">
-        <table id="market-table">
-          <thead>
-            <tr>
-              <th style="width:34px">⇄</th>
-              <th>Item</th>
-              <th class="num">NX cost</th>
-              <th class="num">Sells for (gold)</th>
-              <th class="num">M / $</th>
-              <th class="num">vs airgead</th>
-              <th style="width:34px"></th>
-            </tr>
-          </thead>
-          <tbody id="market-body"></tbody>
-        </table>
+      <div class="card">
+        <header>
+          <h2>Cash-shop items</h2>
+          <p class="hint">Enter what each item currently sells for in gold (accepts <code>60m</code>, <code>900k</code>). NX prices are fixed from the catalog. "vs airgead" shows how much better or worse its M/$ is than the benchmark.</p>
+        </header>
+        <div class="table-wrap">
+          <table id="market-table">
+            <thead>
+              <tr>
+                <th style="width:34px">⇄</th>
+                <th>Item</th>
+                <th class="num">NX cost</th>
+                <th class="num">Sells for (gold)</th>
+                <th class="num">M / $</th>
+                <th class="num">vs airgead</th>
+                <th style="width:34px"></th>
+              </tr>
+            </thead>
+            <tbody id="market-body"></tbody>
+          </table>
+        </div>
+        <p class="hint" style="padding: 0 18px 16px; margin: 0;">Items and their NX prices come from the catalog; here you edit only the current sell price.</p>
       </div>
-      <p class="hint" style="padding: 0 18px 16px; margin: 0;">Items and their NX prices come from the catalog; here you edit only the current sell price.</p>
-    </div>
 
-    <div class="card">
-      <header>
-        <h2>Comparison</h2>
-        <p class="hint">Ranked by M/$. The airgead baseline is always included; the best value is highlighted in gold.</p>
-      </header>
-      <div class="compare" id="compare"></div>
-    </div>
-  </section>
-
-  <section class="panel" id="tab-stat" role="tabpanel" aria-labelledby="tabbtn-stat" hidden>
-    <div class="card">
-      <header>
-        <h2>Grade &amp; stat compare <span class="chip example">starting point</span></h2>
-        <p class="hint">Define the stats you care about, add each item at its grade, and the best value per stat column is highlighted. Awaiting your real grade/stat model.</p>
-      </header>
-      <div class="table-wrap">
-        <table id="stat-table">
-          <thead id="stat-head"></thead>
-          <tbody id="stat-body"></tbody>
-        </table>
+      <div class="card">
+        <header>
+          <h2>Comparison</h2>
+          <p class="hint">Ranked by M/$. The airgead baseline is always included; the best value is highlighted in gold.</p>
+        </header>
+        <div class="compare" id="compare"></div>
       </div>
-      <div class="controls">
-        <button class="btn btn-ghost" id="add-stat-row">+ Add item</button>
-        <label style="font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:8px">+ Stat column
-          <input id="new-stat" placeholder="e.g. ATT, Crit, Balance" autocomplete="off">
-        </label>
-        <button class="btn" id="add-stat-col">Add</button>
-      </div>
-    </div>
-    <p class="note">
-      <strong>Next for this tab:</strong> tell me the grades (names/order) and which stats each grade affects,
-      plus the two reference sites you use — I'll match their stat model so this slots in beside them.
-    </p>
-  </section>
-</main>
+    </section>
+  </main>
 
-<script>
-  const MILLION = 1_000_000;
-  const NX_PER_USD = 1000;       // $1 USD = 1000 NX
-  const AIRGEAD_PER_USD = 1000;  // 1 airgead = 1 NX, so $1 USD = 1000 airgead
-
-  // Catalog — destined for data/items.json when ported. NX prices are hardcoded cash-shop list prices; sell values fluctuate and live in the browser.
-  const CATALOG = [
-    { id: "extraction-rune", name: "Extraction Rune", category: "Cash shop", nx: 18_900, example: true },
-    { id: "enhancement-rune", name: "Enhancement Rune", category: "Cash shop", nx: 9_900, example: true },
-    { id: "goddess-grace", name: "Goddess Grace", category: "Cash shop", nx: 3_900, example: true },
-  ];
-
-  const EXAMPLE_SELL = { "extraction-rune": 60_000_000, "enhancement-rune": 30_000_000, "goddess-grace": 12_000_000 };
-  const EXAMPLE_AG = { market: 300 };
-
-  const store = {
-    read(key, fallback) { try { const raw = localStorage.getItem(key); return raw === null ? fallback : JSON.parse(raw); } catch { return fallback; } },
-    write(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} },
-  };
-
-  const state = {
-    sell: store.read("vpc.sell", structuredClone(EXAMPLE_SELL)),
-    compare: new Set(store.read("vpc.compare", [])),
-    ag: store.read("vpc.ag", structuredClone(EXAMPLE_AG)),
-  };
-
-  const items = () => CATALOG;
-  const nxOf = (item) => item.nx ?? 0;
-  const sellOf = (id) => state.sell[id] ?? 0;
-
-  const gold = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
-  const mpdFmt = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const usdFmt = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
-
-  const usdOf = (nx) => nx / NX_PER_USD;
-  const itemMPD = (item) => { const usd = usdOf(nxOf(item)); return usd > 0 ? (sellOf(item.id) / MILLION) / usd : null; };
-  const airgeadMPD = () => (state.ag.market > 0 ? AIRGEAD_PER_USD / state.ag.market : null);
-
-  function parseNum(text) {
-    const clean = String(text).trim().toLowerCase().replace(/[, ]/g, "");
-    const match = clean.match(/^([\d.]+)([kmb]?)$/);
-    if (!match) return null;
-    const scale = { "": 1, k: 1e3, m: 1e6, b: 1e9 }[match[2]];
-    const n = parseFloat(match[1]);
-    return Number.isFinite(n) ? Math.round(n * scale) : null;
-  }
-
-  function persist() {
-    store.write("vpc.sell", state.sell);
-    store.write("vpc.compare", [...state.compare]);
-    store.write("vpc.ag", state.ag);
-  }
-
-  const marketBody = document.getElementById("market-body");
-  const compareEl = document.getElementById("compare");
-  const benchmarkEl = document.getElementById("benchmark");
-
-  function renderBenchmark() {
-    const mpd = airgeadMPD();
-    if (mpd === null) {
-      benchmarkEl.innerHTML = `<span class="break">Enter the airgead rate to see the baseline.</span>`;
-    } else {
-      benchmarkEl.innerHTML =
-        `<span class="big">${mpdFmt.format(mpd)}</span><span class="unit">M&nbsp;gold / $1 USD</span>` +
-        `<span class="break">${gold.format(AIRGEAD_PER_USD)} airgead per $1 ÷ ${gold.format(state.ag.market)} airgead per 1M gold</span>`;
-    }
-    renderMarket();
-  }
-
-  function renderMarket() {
-    const baseline = airgeadMPD();
-    marketBody.replaceChildren();
-    for (const item of items()) {
-      const nx = nxOf(item);
-      const mpd = itemMPD(item);
-      const row = document.createElement("tr");
-
-      const pick = document.createElement("input");
-      pick.type = "checkbox";
-      pick.checked = state.compare.has(item.id);
-      pick.setAttribute("aria-label", "Compare " + item.name);
-      pick.addEventListener("change", () => { pick.checked ? state.compare.add(item.id) : state.compare.delete(item.id); persist(); renderCompare(); });
-
-      const sellInput = numInput(sellOf(item.id), (n) => { state.sell[item.id] = n; persist(); renderBenchmark(); });
-
-      const nxCell = textCell(gold.format(nx), "num");
-      nxCell.append(subLine(usdFmt.format(usdOf(nx))));
-
-      row.append(
-        cell(pick),
-        nameCell(item),
-        nxCell,
-        cell(sellInput, "num"),
-        textCell(mpd === null ? "—" : mpdFmt.format(mpd), "num mpd"),
-        cell(deltaChip(mpd, baseline), "num"),
-        cell(item.example ? exampleTag() : document.createElement("span")),
-      );
-      marketBody.append(row);
-    }
-    renderCompare();
-  }
-
-  function deltaChip(mpd, baseline) {
-    if (mpd === null || baseline === null) return span("delta flat", "—");
-    const diff = mpd - baseline;
-    const cls = diff > 0.004 ? "up" : diff < -0.004 ? "down" : "flat";
-    const sign = diff > 0 ? "+" : "";
-    return span("delta " + cls, cls === "flat" ? "even" : `${sign}${mpdFmt.format(diff)}`);
-  }
-
-  function renderCompare() {
-    const picked = items().filter((it) => state.compare.has(it.id));
-    compareEl.replaceChildren();
-    if (picked.length < 1) return;
-
-    const baseline = airgeadMPD();
-    const contenders = picked.map((it) => ({ name: it.name, mpd: itemMPD(it), item: it }));
-    if (baseline !== null) contenders.push({ name: "Buy airgead", mpd: baseline, airgead: true });
-
-    const ranked = contenders.filter((c) => c.mpd !== null).sort((a, b) => b.mpd - a.mpd);
-    const bestMpd = ranked.length ? ranked[0].mpd : null;
-
-    for (const c of ranked) {
-      const card = document.createElement("div");
-      card.className = "cc" + (c.mpd === bestMpd ? " best" : "") + (c.airgead ? " airgead" : "");
-      const detail = c.airgead
-        ? `<dl><dt>Airgead / 1M gold</dt><dd>${gold.format(state.ag.market)}</dd><dt>Airgead / $1</dt><dd>${gold.format(AIRGEAD_PER_USD)}</dd></dl>`
-        : `<dl><dt>NX cost</dt><dd>${gold.format(nxOf(c.item))}</dd><dt>USD</dt><dd>${usdFmt.format(usdOf(nxOf(c.item)))}</dd><dt>Sells for</dt><dd>${gold.format(sellOf(c.item.id))}</dd></dl>`;
-      card.innerHTML =
-        `<h3>${escapeHtml(c.name)}</h3>` +
-        (c.mpd === bestMpd ? '<span class="chip">Best value</span>' : "") +
-        `<div class="lead" style="color:${c.airgead ? "var(--silver)" : "var(--gold)"}">${mpdFmt.format(c.mpd)} <span style="font-size:.75rem;color:var(--muted);font-family:var(--font-body)">M/$</span></div>` +
-        detail;
-      compareEl.append(card);
-    }
-  }
-
-  // Cell + element helpers
-  function cell(node, className) { const td = document.createElement("td"); if (className) td.className = className; td.append(node); return td; }
-  function textCell(text, className) { const td = document.createElement("td"); if (className) td.className = className; td.textContent = text; return td; }
-  function subLine(text) { const div = document.createElement("div"); div.className = "usd-sub"; div.textContent = text; return div; }
-  function span(className, text) { const el = document.createElement("span"); el.className = className; el.textContent = text; return el; }
-  function nameCell(item) { const td = document.createElement("td"); td.innerHTML = `<div class="item-name">${escapeHtml(item.name)}</div><div class="item-cat">${escapeHtml(item.category || "")}</div>`; return td; }
-  function exampleTag() { return span("chip example", "example"); }
-
-  function numInput(value, onChange) {
-    const input = document.createElement("input");
-    input.className = "num-in"; input.inputMode = "decimal"; input.autocomplete = "off";
-    input.value = gold.format(value);
-    input.addEventListener("focus", () => { input.value = value ? String(value) : ""; input.select(); });
-    input.addEventListener("blur", () => { const parsed = parseNum(input.value) ?? 0; value = parsed; input.value = gold.format(parsed); onChange(parsed); });
-    return input;
-  }
-
-  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
-
-  // Benchmark inputs
-  const agMarket = document.getElementById("ag-market");
-  agMarket.value = gold.format(state.ag.market);
-  agMarket.addEventListener("blur", () => { state.ag.market = parseNum(agMarket.value) ?? 0; agMarket.value = gold.format(state.ag.market); persist(); renderBenchmark(); });
-
-  // Tabs
-  const tabs = [{ btn: "tabbtn-buy", panel: "tab-buy" }, { btn: "tabbtn-stat", panel: "tab-stat" }];
-  for (const { btn, panel } of tabs) {
-    document.getElementById(btn).addEventListener("click", () => {
-      for (const t of tabs) { const sel = t.btn === btn; document.getElementById(t.btn).setAttribute("aria-selected", String(sel)); document.getElementById(t.panel).hidden = !sel; }
-    });
-  }
-
-  // Theme toggle
-  const themeBtn = document.getElementById("theme-toggle");
-  themeBtn.addEventListener("click", () => {
-    const current = document.documentElement.getAttribute("data-theme");
-    const prefersDark = matchMedia("(prefers-color-scheme: dark)").matches;
-    const next = current ? (current === "dark" ? "light" : "dark") : (prefersDark ? "light" : "dark");
-    document.documentElement.setAttribute("data-theme", next);
-    store.write("vpc.theme", next);
-  });
-  const savedTheme = store.read("vpc.theme", null);
-  if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
-
-  // Stat Compare (generic starting point)
-  const statState = store.read("vpc.stat", {
-    columns: ["ATT", "Crit"],
-    rows: [
-      { name: "Accessory A", grade: "Gold", values: { ATT: 42, Crit: 8 } },
-      { name: "Accessory B", grade: "Blue", values: { ATT: 30, Crit: 12 } },
-    ],
-  });
-  const statHead = document.getElementById("stat-head");
-  const statBody = document.getElementById("stat-body");
-  const persistStat = () => store.write("vpc.stat", statState);
-
-  function renderStat() {
-    const headRow = document.createElement("tr");
-    headRow.append(th("Item"), th("Grade"));
-    for (const col of statState.columns) headRow.append(th(col, "num"));
-    headRow.append(th(""));
-    statHead.replaceChildren(headRow);
-
-    const bestPerCol = {};
-    for (const col of statState.columns) bestPerCol[col] = Math.max(...statState.rows.map((r) => Number(r.values[col]) || -Infinity));
-
-    statBody.replaceChildren();
-    statState.rows.forEach((r, i) => {
-      const tr = document.createElement("tr");
-      tr.append(editCell(r.name, (v) => { r.name = v; persistStat(); }), editCell(r.grade, (v) => { r.grade = v; persistStat(); }));
-      for (const col of statState.columns) {
-        const td = document.createElement("td"); td.className = "num";
-        const input = document.createElement("input"); input.className = "num-in"; input.inputMode = "decimal"; input.value = r.values[col] ?? "";
-        input.addEventListener("blur", () => { r.values[col] = input.value === "" ? "" : Number(input.value); persistStat(); renderStat(); });
-        if ((Number(r.values[col]) || -Infinity) === bestPerCol[col] && statState.rows.length > 1) td.classList.add("stat-best");
-        td.append(input); tr.append(td);
-      }
-      const del = document.createElement("td");
-      const btn = document.createElement("button"); btn.className = "btn-icon"; btn.textContent = "✕"; btn.title = "Remove";
-      btn.addEventListener("click", () => { statState.rows.splice(i, 1); persistStat(); renderStat(); });
-      del.append(btn); tr.append(del);
-      statBody.append(tr);
-    });
-  }
-
-  function th(text, className) { const el = document.createElement("th"); if (className) el.className = className; el.textContent = text; return el; }
-  function editCell(value, onChange) { const td = document.createElement("td"); const input = document.createElement("input"); input.value = value; input.style.width = "14ch"; input.addEventListener("blur", () => onChange(input.value)); td.append(input); return td; }
-
-  document.getElementById("add-stat-row").addEventListener("click", () => { statState.rows.push({ name: "New item", grade: "", values: {} }); persistStat(); renderStat(); });
-  document.getElementById("add-stat-col").addEventListener("click", () => {
-    const input = document.getElementById("new-stat"); const name = input.value.trim();
-    if (name && !statState.columns.includes(name)) { statState.columns.push(name); input.value = ""; persistStat(); renderStat(); }
-  });
-
-  renderBenchmark();
-  renderStat();
-</script>
+  <script src="assets/data.js"></script>
+  <script src="assets/common.js"></script>
+  <script src="assets/buy.js"></script>
 </body>
 </html>
