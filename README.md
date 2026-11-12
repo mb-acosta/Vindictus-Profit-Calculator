@@ -43,6 +43,24 @@ Each page loads `data.js`, then `common.js`, then its own page script.
 - Fluctuating values — sell prices, the airgead rate, the roller session — live in
   the browser's `localStorage`, not in the repo.
 
+## Claude Code skills (every device)
+
+This repo carries two Claude Code plugins in [.claude/settings.json](.claude/settings.json)
+so they load automatically wherever you open the project:
+
+- **ponytail** (`dietrichgebert/ponytail`) — lazy senior-dev mode: simplest solution that works.
+- **i-have-adhd** (`ayghri/i-have-adhd`) — ADHD-shaped, action-first output.
+
+Opening this project on a new device prompts once to trust the two marketplaces,
+then installs both at user scope. If the prompt doesn't appear, run manually:
+
+```bash
+claude plugin marketplace add dietrichgebert/ponytail
+claude plugin install ponytail@ponytail
+claude plugin marketplace add ayghri/i-have-adhd
+claude plugin install i-have-adhd@i-have-adhd
+```
+
 ## Hosting on GitHub Pages
 
 Enable Pages for the repo (serve from the branch root). The site is plain static
